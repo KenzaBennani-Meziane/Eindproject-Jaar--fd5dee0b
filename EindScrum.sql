@@ -14,4 +14,4 @@ id INT AUTO_INCREMENT PRIMARY KEY NOT NULL
 );
 
 INSERT INTO COACHES (naam, id)
-VALUES ('Ties', NULL), ('Klaas', NULL);m 4', curdate());
+VALUES ('Ties', NULL), ('Klaas', NULL);
