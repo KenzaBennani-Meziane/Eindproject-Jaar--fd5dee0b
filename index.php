@@ -3,6 +3,7 @@
         <h3>Post aanmaken</h3>
         <form action="index.php" method="post" id="form">
             <input type="text" name="naam" placeholder="Titel"><br>
+            <input type="text" name="coach" placeholder="Coach"><br>
             <textarea form="form" width="100" type="text" name="issue" placeholder="Text..."></textarea><br>
             <input type="submit" name="submit">
         </form>
@@ -27,22 +28,22 @@ try {
 } catch (\PDOException $e) {
     throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
-$result = $pdo->query('SELECT * FROM info');
+$result = $pdo->query('SELECT * FROM issues');
 
 while($row=$result->fetch()){
     echo "Naam: " . $row['naam'] . ' ';
     echo "Issue: " . $row['issue'] .' ';
+    echo "Coach: " . $row['naamCoach'] .' ';
     echo "Tijd: " . $row['ArrivalDate'] . '<br>';
-
 }
 ?>
 <?php
 if(isset($_POST["submit"])){
     try {
-        if(!empty($_POST["naam"]) && !empty($_POST["issue"]) ) {
+        if(!empty($_POST["naam"]) && !empty($_POST["issue"]) && !empty($_POST["coach"]) ) {
             $stmt = $pdo->prepare(
-                "INSERT INTO info (naam, issue)
-                VALUES ('".$_POST["naam"]."', '".$_POST["issue"]."');"
+                "INSERT INTO issues (naam, issue, naamCoach)
+                VALUES ('".$_POST["naam"]."', '".$_POST["issue"]."', '".$_POST["coach"]."');"
             );
             $stmt->execute();
             header("Location: index.php");
