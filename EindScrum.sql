@@ -3,18 +3,18 @@ CREATE DATABASE scrum;
 USE scrum;
 
 CREATE TABLE COACHES(
-naamCoach varchar(30) NOT NULL,
-idCoach INT AUTO_INCREMENT PRIMARY KEY NOT NULL
+naamCoach varchar(30)  NOT NULL,
+ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL
 );
-INSERT INTO COACHES (naamCoach, idCoach)
-VALUES ('Ties', NULL);
+INSERT INTO COACHES (naamCoach, ID)
+VALUES ('Ties', NULL), ('Klaas', NULL);
 
 
 CREATE TABLE STUDENTS(
 naamStudent varchar(30) NOT NULL,
-idStudent INT AUTO_INCREMENT PRIMARY KEY NOT NULL
+ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL
 );
-INSERT INTO STUDENTS (naamStudent, idStudent)
+INSERT INTO STUDENTS (naamStudent, ID)
 VALUES ('Laurens', NULL), ('Iz-Dine', NULL), ('Kenza', NULL), ('Kenza', NULL), ('Sam', NULL);
 
 
@@ -23,12 +23,15 @@ CREATE TABLE issues(
     issue VARCHAR(500) NOT NULL,
     lokaal VARCHAR(20) NULL,
     ArrivalDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    naamCoach  varchar(30) NOT NULL,
-    FOREIGN KEY (naamCoach) REFERENCES COACHES(naamCoach),
     idStudent INT,
-    FOREIGN KEY (idStudent) REFERENCES STUDENTS(idStudent),
+    idCoach INT,
+    FOREIGN KEY (idCoach) REFERENCES COACHES(ID),
+    FOREIGN KEY (idStudent) REFERENCES STUDENTS(ID),
     idIssue INT AUTO_INCREMENT PRIMARY KEY NOT NULL
 );
+
+-- insert into issues (naam, issue, idCoach)
+-- values('Laurens', 'probleem', 2);
 
 SELECT * FROM issues;
 SHOW TABLES;

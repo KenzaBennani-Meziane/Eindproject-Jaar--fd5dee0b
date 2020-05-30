@@ -2,7 +2,7 @@
 
         <h3>Post aanmaken</h3>
         <form action="index.php" method="post" id="form">
-            <input type="text" name="naam" placeholder="Titel"><br>
+            <input type="text" name="naam" placeholder="Naam"><br>
             <input type="text" name="coach" placeholder="Coach"><br>
             <textarea form="form" width="100" type="text" name="issue" placeholder="Text..."></textarea><br>
             <input type="submit" name="submit">
@@ -30,19 +30,24 @@ try {
 }
 $result = $pdo->query('SELECT * FROM issues');
 
-while($row=$result->fetch()){
-    echo "Naam: " . $row['naam'] . ' ';
-    echo "Issue: " . $row['issue'] .' ';
-    echo "Coach: " . $row['naamCoach'] .' ';
-    echo "Tijd: " . $row['ArrivalDate'] . '<br>';
-}
+    foreach($result as $row){
+        echo "Naam: " . $row['naam'] . ' ';
+        echo "Issue: " . $row['issue'] .' ';
+          $coach = $row['idCoach'];
+          $resultCoaches = $pdo->query("SELECT * FROM COACHES WHERE ID= " . $coach);
+          foreach($resultCoaches as $res) {
+            echo "Coach: " . $res['naamCoach'] .' ';
+          }
+        echo "Tijd: " . $row['ArrivalDate'] . '<br>';
+    }
 ?>
 <?php
 if(isset($_POST["submit"])){
     try {
+
         if(!empty($_POST["naam"]) && !empty($_POST["issue"]) && !empty($_POST["coach"]) ) {
             $stmt = $pdo->prepare(
-                "INSERT INTO issues (naam, issue, naamCoach)
+                "INSERT INTO issues (naam, issue, idCoach)
                 VALUES ('".$_POST["naam"]."', '".$_POST["issue"]."', '".$_POST["coach"]."');"
             );
             $stmt->execute();
