@@ -4,6 +4,7 @@
         <form action="index.php" method="post" id="form">
             <input type="text" name="naam" placeholder="Naam"><br>
             <input type="text" name="coach" placeholder="Coach"><br>
+            <!-- <input type="text" name="lokaal" placeholder="Lokaal"><br> -->
             <textarea form="form" width="100" type="text" name="issue" placeholder="Text..."></textarea><br>
             <input type="submit" name="submit">
         </form>
@@ -28,17 +29,23 @@ try {
 } catch (\PDOException $e) {
     throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
-$result = $pdo->query('SELECT * FROM issues');
+$resultIssues = $pdo->query('SELECT * FROM issues');
 
-    foreach($result as $row){
-        echo "Naam: " . $row['naam'] . ' ';
-        echo "Issue: " . $row['issue'] .' ';
-          $coach = $row['idCoach'];
-          $resultCoaches = $pdo->query("SELECT * FROM COACHES WHERE ID= " . $coach);
-          foreach($resultCoaches as $res) {
-            echo "Coach: " . $res['naamCoach'] .' ';
+    foreach($resultIssues as $r_Issues){
+        $resultStudents = $pdo->query("SELECT * FROM STUDENTS WHERE naamStudent= '".$r_Issues["naam"]."' ");
+          foreach($resultStudents as $r_Students) {
+            echo "Student: " . $r_Students['naamStudent'] .' ';
+            $test = $r_Students['ID'];
           }
-        echo "Tijd: " . $row['ArrivalDate'] . '<br>';
+
+        echo "Issue: " . $r_Issues['issue'] .' ';
+
+        $resultCoaches = $pdo->query("SELECT * FROM COACHES WHERE ID= " . $r_Issues['idCoach']);
+          foreach($resultCoaches as $r_Coaches) {
+            echo "Coach: " . $r_Coaches['naamCoach'] .' ';
+          }
+
+        echo "Tijd: " . $r_Issues['ArrivalDate'] . '<br>';
     }
 ?>
 <?php
@@ -47,8 +54,8 @@ if(isset($_POST["submit"])){
 
         if(!empty($_POST["naam"]) && !empty($_POST["issue"]) && !empty($_POST["coach"]) ) {
             $stmt = $pdo->prepare(
-                "INSERT INTO issues (naam, issue, idCoach)
-                VALUES ('".$_POST["naam"]."', '".$_POST["issue"]."', '".$_POST["coach"]."');"
+                "INSERT INTO issues (naam, issue, idCoach, idStudent)
+                VALUES ('".$_POST["naam"]."', '".$_POST["issue"]."', '".$_POST["coach"]."', '".$test."');"
             );
             $stmt->execute();
             header("Location: index.php");
@@ -58,6 +65,7 @@ if(isset($_POST["submit"])){
     } catch (Exception $e) {
         echo "<p>Error: ".$e->getMessage()."</p>";
     }
+
 }
 
 ?>
