@@ -16,11 +16,39 @@ ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL
 );
 INSERT INTO STUDENTS (naamStudent, ID)
 VALUES 
-('Laurens', NULL), 
-('Iz-Dine', NULL), 
-('Kenza', NULL), 
+('Aaron', NULL),
+('Aimane', NULL),
+('Beau', NULL),
+('George', NULL),
+('Iz-Dine', NULL),
+('Jim', NULL),
+('Jimmy', NULL),
+('Kenza', NULL),
+('Kevin', NULL),
+('Lara', NULL),
+('Lars', NULL),
+('Leah', NULL),
+('Laurens', NULL),
+('Mohammed', NULL),
+('Riccardo', NULL),
+('Ruben', NULL),
 ('Sam', NULL),
+('Shailesh', NULL),
+('Silvester', NULL),
+('Steven', NULL),
+('Stijn', NULL),
+('Thomas', NULL),
+('Yari', NULL),
+('Youssef', NULL),
+('Zanhua Li', NULL),
 ('test', NULL);
+
+
+-- CREATE TABLE issues(
+-- 	studentsID INT,
+--     studentID INT,
+--     FOREIGN KEY (idCoach) REFERENCES COACHES(ID),
+--     FOREIGN KEY (idStudent) REFERENCES STUDENTS(ID),
 
 
 CREATE TABLE issues(
@@ -34,8 +62,6 @@ CREATE TABLE issues(
     idIssue INT AUTO_INCREMENT PRIMARY KEY NOT NULL
 );
 
-INSERT INTO issues (naam, issue, idCoach, idStudent)
-                VALUES ('test', 'test', 1, 4);
 -- insert into issues (naam, issue, idCoach)
 -- values('Laurens', 'probleem', 2);
 
