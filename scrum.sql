@@ -59,6 +59,14 @@ CREATE TABLE ISSUES(
     FOREIGN KEY (idStudent) REFERENCES STUDENTS(ID),
     ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL
 );
+insert into ISSUES (naam, issue)
+value('Laurens', 'ik heb een probleem');
+insert into ISSUES (naam, issue)
+value('Sam', 'ties help');
+insert into ISSUES (naam, issue)
+value('Kenza', 'klaas help');
+insert into ISSUES (naam, issue)
+value('Iz-Dine', 'me pdo werkt niet');
 
 
 
@@ -68,10 +76,18 @@ CREATE TABLE coachIssue(
  idCoach INT,
  FOREIGN KEY (idCoach) REFERENCES COACHES(ID),
  idIssue INT,
- FOREIGN KEY (idIssue) REFERENCES issues(ID),
+ FOREIGN KEY (idIssue) REFERENCES ISSUES(ID),
 
  PRIMARY KEY (idCoach, idIssue)
 );
+insert into coachIssue (idCoach, idIssue)
+value(1,1);
+insert into coachIssue (idCoach, idIssue)
+value(1,2);
+insert into coachIssue (idCoach, idIssue)
+value(2,3);
+insert into coachIssue (idCoach, idIssue)
+value(2,4);
 
 SELECT * FROM issues;
 SHOW TABLES;
