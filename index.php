@@ -2,7 +2,8 @@
 
         <h3>Post aanmaken</h3>
         <form action="index.php" method="post" id="form">
-            <input type="text" name="naam" placeholder="Titel"><br>
+            <input type="text" name="naam" placeholder="Naam"><br>
+            <input type="text" name="coach" placeholder="Coach"><br>
             <textarea form="form" width="100" type="text" name="issue" placeholder="Text..."></textarea><br>
             <input type="submit" name="submit">
         </form>
@@ -27,24 +28,39 @@ try {
 } catch (\PDOException $e) {
     throw new \PDOException($e->getMessage(), (int)$e->getCode());
 }
-$result = $pdo->query('SELECT * FROM info');
+$resultIssues = $pdo->query('SELECT * FROM issues');
 
-while($row=$result->fetch()){
-    echo "Naam: " . $row['naam'] . ' ';
-    echo "Issue: " . $row['issue'] .' ';
-    echo "Tijd: " . $row['ArrivalDate'] . '<br>';
+$test = NULL;
 
+foreach($resultIssues as $r_Issues){
+
+    $resultStudents = $pdo->query("SELECT * FROM STUDENTS WHERE naamStudent=  '".$r_Issues['naam']."' ");
+      foreach($resultStudents as $r_Students) {
+        echo "Student: " . $r_Students['naamStudent'] .' ';
+        $test = (int)$r_Students['ID'];
+      }
+
+    echo "Issue: " . $r_Issues['issue'] .' ';
+
+    $resultCoaches = $pdo->query("SELECT * FROM COACHES WHERE ID= " . $r_Issues['idCoach']);
+      foreach($resultCoaches as $r_Coaches) {
+        echo "Coach: " . $r_Coaches['naamCoach'] .' ';
+      }
+
+    echo "Tijd: " . $r_Issues['ArrivalDate'] . '<br>';
 }
-?>
-<?php
+echo "test " . $test;
+
 if(isset($_POST["submit"])){
+  
     try {
-        if(!empty($_POST["naam"]) && !empty($_POST["issue"]) ) {
+
+        if(!empty($_POST["naam"]) && !empty($_POST["issue"]) && !empty($_POST["coach"]) ) {
             $stmt = $pdo->prepare(
-                "INSERT INTO info (naam, issue)
-                VALUES ('".$_POST["naam"]."', '".$_POST["issue"]."');"
+                "INSERT INTO issues (naam, issue, idCoach, idStudent)
+                VALUES (:naam, :issue, :idCoach, :idStudent );"
             );
-            $stmt->execute();
+            $stmt->execute(array(':naam' => $_POST['naam'], ':issue' => $_POST['issue'], ':idCoach' => $_POST['coach'], ':idStudent' => $test));
             header("Location: index.php");
         } else {
             throw new Exception("Je hebt niet alles ingevult");
