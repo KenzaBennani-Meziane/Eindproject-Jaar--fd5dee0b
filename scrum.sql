@@ -66,8 +66,11 @@ value('Sam', 'ties help');
 insert into ISSUES (naam, issue)
 value('Kenza', 'klaas help');
 insert into ISSUES (naam, issue)
-value('Iz-Dine', 'me pdo werkt niet');
-
+value('Iz-Dine', 'mijn pdo werkt niet');
+insert into ISSUES (naam, issue)
+value('Kenza', 'IK HEB HONGER');
+insert into ISSUES (naam, issue)
+value('Laurens', 'Ties kan je me helpen');
 
 
 
@@ -88,7 +91,11 @@ insert into coachIssue (idCoach, idIssue)
 value(2,3);
 insert into coachIssue (idCoach, idIssue)
 value(2,4);
+insert into coachIssue (idCoach, idIssue)
+value(1,5);
+insert into coachIssue (idCoach, idIssue)
+value(1,6);
 
-SELECT * FROM issues;
+SELECT naamStudent FROM STUDENTS;
 SHOW TABLES;
 DESCRIBE issues;
