@@ -1,6 +1,8 @@
+//Required for the bot
 require('dotenv').config();
 const token = process.env.SLACK_TOKEN;
 const mysql = require('mysql');
+var SlackBot = require('slackbots');
 
 var connection = mysql.createConnection({
 	host: "skil1.mysql.database.azure.com",
@@ -15,12 +17,12 @@ connection.connect(function (err) {
 	console.log("Connected!");
 });
 
-var SlackBot = require('slackbots');
+
 const coaches = ["UQCGKUNAK", "UF47HSVPT", "UQEB1731P", "UQCSZPV1U", "UQAM223S9"];
 
-// create a bot
+// Create a bot
 var bot = new SlackBot({
-	token: process.env.SLACK_TOKEN, // Add a bot https://my.slack.com/services/new/bot and put the token
+	token: process.env.SLACK_TOKEN, 
 	name: 'skilbot'
 });
 bot.on('start', () => {
