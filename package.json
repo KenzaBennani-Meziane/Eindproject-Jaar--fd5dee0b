@@ -1,0 +1,30 @@
+{
+  "name": "skil-bot",
+  "version": "1.0.0",
+  "description": "Queueing bot for the coaches and the students",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IcedOutSam/Eindproject-Jaar--fd5dee0b.git"
+  },
+  "keywords": [
+    "Slack",
+    "bot",
+    "Bit",
+    "Academy"
+  ],
+  "author": "Kenza, Laurens, Iz-Dine en Sam",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/IcedOutSam/Eindproject-Jaar--fd5dee0b/issues"
+  },
+  "homepage": "https://github.com/IcedOutSam/Eindproject-Jaar--fd5dee0b#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "mysql": "^2.18.1",
+    "slackbots": "^1.2.0"
+  }
+}
