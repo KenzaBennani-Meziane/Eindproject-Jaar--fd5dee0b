@@ -2,19 +2,18 @@ require('dotenv').config();
 const token = process.env.SLACK_TOKEN;
 const mysql = require('mysql');
 
-var connection = mysql.createConnection({
-	host: "skil1.mysql.database.azure.com",
-	database: 'skil',
-	user: process.env.DB_USER,
-	password: process.env.DB_PASS
+
+var pool  = mysql.createPool({
+  connectionLimit : 10,
+  host            : "skil1.mysql.database.azure.com",
+  user            :  process.env.DB_USER,
+  password        : process.env.DB_PASS,
+  database        : 'skil'
 });
-
-
-connection.connect(function (err) {
-	if (err) throw err;
+pool.getConnection(function(err, connection) {
+	if (err) throw err; // not connected!
 	console.log("Connected!");
 });
-
 var SlackBot = require('slackbots');
 const coaches = ["UF47HSVPT", "UQEB1731P", "UQCSZPV1U", "UQAM223S9"];
 const masters = ["UQCGKUNAK"];
@@ -65,12 +64,12 @@ bot.on('error', err => console.log(err));
 //functions
 function issuesTies() {
 	console.log('begin functie issuesTies()');
-	connection.query("SELECT idIssue FROM coachIssue", function STUDENTS(err, resultTies) {
+	pool.query("SELECT idIssue FROM coachIssue", function STUDENTS(err, resultTies) {
 		for (var i = 0; i < resultTies.length; i++) {
 			console.log(`index: ${resultTies[i].idIssue} in de for loop`);
 			var ID = resultTies[i].idIssue;
 
-			connection.query("SELECT * FROM ISSUES WHERE ID=" + ID, function STUDENTS(err, resultIssue) {
+			pool.query("SELECT * FROM ISSUES WHERE ID=" + ID, function STUDENTS(err, resultIssue) {
 				if (err) throw err;
 
 				for (var j = 0; j < resultIssue.length; j++) {
@@ -88,7 +87,7 @@ function deleteIssue(message) {
 	console.log(message);
 	var Id = message;
 	var sql   = 'DELETE FROM coachIssue WHERE idIssue  = ' + connection.escape(Id);
-	connection.query(sql, function (error, results, fields) {
+	pool.query(sql, function (error, results, fields) {
 	  if (error) throw error;
 	console.log('deleted ' + results.affectedRows + ' rows');
 	});
@@ -97,7 +96,7 @@ function deleteIssue(message) {
 
 function insert(message) {
 	var sql = `INSERT INTO issues (naam, issue) VALUES (${message}, ${message})`;
-  con.query(sql, function (err, result) {
+  pool.query(sql, function (err, result) {
     if (err) throw err;
     console.log("1 record inserted");
   });
