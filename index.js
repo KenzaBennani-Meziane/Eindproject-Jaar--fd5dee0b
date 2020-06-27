@@ -1,14 +1,26 @@
+// Required 
 require('dotenv').config();
 const token = process.env.SLACK_TOKEN;
 const mysql = require('mysql');
+const express = require('express')
 
+// Local Hosting
+const app = express()
+const port = 3000
+app.post('/', (req, res) => {
+    console.warn (req);
+    res.send('Hello World!');
+})
+app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
+
+
+// Database Connection
 var connection = mysql.createConnection({
 	host: "skil1.mysql.database.azure.com",
 	database: 'skil',
 	user: process.env.DB_USER,
 	password: process.env.DB_PASS
 });
-
 
 connection.connect(function (err) {
 	if (err) throw err;
@@ -18,7 +30,8 @@ connection.connect(function (err) {
 var SlackBot = require('slackbots');
 const coaches = ["UQCGKUNAK", "UF47HSVPT", "UQEB1731P", "UQCSZPV1U", "UQAM223S9"];
 
-// create a bot
+
+// Create a bot
 var bot = new SlackBot({
 	token: process.env.SLACK_TOKEN, // Add a bot https://my.slack.com/services/new/bot and put the token
 	name: 'skilbot'
@@ -48,12 +61,11 @@ bot.on('message', (message) => {
 });
 
 
-
 // Error Handler
 bot.on('error', err => console.log(err));
 
 
-//Functions
+// Functions (Ignore the amount of nesting pls)
 function issuesTies() {
 	console.log('begin functie issuesTies()');
 	connection.query("SELECT idIssue FROM coachIssue WHERE idCoach=1", function STUDENTS(err, resultTies) {

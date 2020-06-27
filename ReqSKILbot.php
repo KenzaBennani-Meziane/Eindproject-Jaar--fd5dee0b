@@ -1,1 +1,0 @@
-<!-- This file is for requests getting sent to the bot -->
