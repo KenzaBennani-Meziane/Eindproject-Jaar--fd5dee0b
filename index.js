@@ -1,3 +1,6 @@
+const express = require('express')
+const app = express()
+const port = 3000
 require('dotenv').config();
 const token = process.env.SLACK_TOKEN;
 const mysql = require('mysql');
@@ -14,8 +17,9 @@ pool.getConnection(function(err, connection) {
 	if (err) throw err; // not connected!
 	console.log("Connected!");
 });
+
 var SlackBot = require('slackbots');
-const coaches = ["UF47HSVPT", "UQEB1731P", "UQCSZPV1U", "UQAM223S9"];
+const coaches = ["UQCGKUNAK", "UF47HSVPT", "UQEB1731P", "UQCSZPV1U", "UQAM223S9"];
 const masters = ["UQCGKUNAK"];
 
 // create a bot
@@ -39,19 +43,8 @@ bot.on('start', () => {
 //message Handler
 bot.on('message', (message) => {
 	if (message.type == 'message') {
-		console.log(message.user);
-		console.log(`type van message.user is ${typeof message.user}`);
-
-      if (coaches.includes(message.user)) {
-        console.log('test coaches includes');
-        issuesTies();
-      } else {
-      	console.log('error');
-      }
-
-			if (masters.includes(message.user)) {
-				deleteIssue();
-			}
+		// console.log(message.user);
+		// console.log(`type van message.user is ${typeof message.user}`);
 	}
 });
 
@@ -60,44 +53,45 @@ bot.on('message', (message) => {
 // Error Handler
 bot.on('error', err => console.log(err));
 
-
-//functions
-function issuesTies() {
-	console.log('begin functie issuesTies()');
-	pool.query("SELECT idIssue FROM coachIssue", function STUDENTS(err, resultTies) {
-		for (var i = 0; i < resultTies.length; i++) {
-			console.log(`index: ${resultTies[i].idIssue} in de for loop`);
-			var ID = resultTies[i].idIssue;
-
-			pool.query("SELECT * FROM ISSUES WHERE ID=" + ID, function STUDENTS(err, resultIssue) {
-				if (err) throw err;
-
-				for (var j = 0; j < resultIssue.length; j++) {
-					bot.postMessageToChannel(
-						'skilbot_test_channel',
-						`Naam: (${resultIssue[j].naam})   Issue: (${resultIssue[j].issue})   Date: (${resultIssue[j].arrivalDate})   ID: (${resultIssue[j].ID})`
-					);
-				}
-			});
-		}
-	});
-}
-
-function deleteIssue(message) {
-	console.log(message);
-	var Id = message;
-	var sql   = 'DELETE FROM coachIssue WHERE idIssue  = ' + connection.escape(Id);
-	pool.query(sql, function (error, results, fields) {
-	  if (error) throw error;
-	console.log('deleted ' + results.affectedRows + ' rows');
-	});
-}
+// /commands
+app.post('/issues', (req, res) => {
+    pool.query("SELECT idIssue FROM coachIssue", function STUDENTS(err, resultCoach) {
+      var counter = 0;
+      for (var i = 0; i < resultCoach.length; i++) {
+        var ID = resultCoach[i].idIssue;
+        pool.query("SELECT * FROM ISSUES WHERE ID=" + ID, function STUDENTS(err, resultIssue) {
+          if (err) throw err;
+          console.log(i);
+            for (var j = 0; j < resultIssue.length; j++) {
+              res.write(`\n ${resultIssue[j].naam}   Issue: ${resultIssue[j].issue}   Date: ${resultIssue[j].arrivalDate}   ID: ${resultIssue[j].ID} \n`);
+            }
+            counter = counter + 1;
+            if (counter === i) {
+              console.log("end");
+              res.end();
+            }
+        });
+      }
+    });
+});
+app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
 
 
-function insert(message) {
-	var sql = `INSERT INTO issues (naam, issue) VALUES (${message}, ${message})`;
-  pool.query(sql, function (err, result) {
-    if (err) throw err;
-    console.log("1 record inserted");
-  });
-}
+// function deleteIssue(message) {
+// 	console.log(message);
+// 	var Id = message;
+// 	var sql   = 'DELETE FROM coachIssue WHERE idIssue  = ' + connection.escape(Id);
+// 	pool.query(sql, function (error, results, fields) {
+// 	  if (error) throw error;
+// 	console.log('deleted ' + results.affectedRows + ' rows');
+// 	});
+// }
+//
+//
+// function insert(message) {
+// 	var sql = `INSERT INTO issues (naam, issue) VALUES (${message}, ${message})`;
+//   pool.query(sql, function (err, result) {
+//     if (err) throw err;
+//     console.log("1 record inserted");
+//   });
+// }
