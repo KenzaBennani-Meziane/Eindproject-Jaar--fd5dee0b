@@ -4,6 +4,8 @@ const port = 3000
 require('dotenv').config();
 const token = process.env.SLACK_TOKEN;
 const mysql = require('mysql');
+var bodyParser = require('body-parser');
+app.use(bodyParser());
 
 
 var pool  = mysql.createPool({
@@ -29,15 +31,7 @@ var bot = new SlackBot({
 });
 
 bot.on('start', () => {
-	const params = {
-		icon_emoji: ':robot:'
-	};
-
-	bot.postMessageToChannel(
-		'skilbot_test_channel',
-		'SKILbot tot je beschikking',
-		params
-	);
+  console.log("SKILbot to je beschikking")
 });
 
 //message Handler
@@ -55,36 +49,39 @@ bot.on('error', err => console.log(err));
 
 // /commands
 app.post('/issues', (req, res) => {
-    pool.query("SELECT idIssue FROM coachIssue", function STUDENTS(err, resultCoach) {
-      var counter = 0;
-      for (var i = 0; i < resultCoach.length; i++) {
-        var ID = resultCoach[i].idIssue;
-        pool.query("SELECT * FROM ISSUES WHERE ID=" + ID, function STUDENTS(err, resultIssue) {
-          if (err) throw err;
-          console.log(i);
-            for (var j = 0; j < resultIssue.length; j++) {
-              res.write(`\n ${resultIssue[j].naam}   Issue: ${resultIssue[j].issue}   Date: ${resultIssue[j].arrivalDate}   ID: ${resultIssue[j].ID} \n`);
-            }
-            counter = counter + 1;
-            if (counter === i) {
-              console.log("end");
-              res.end();
-            }
-        });
+  console.log(req.body.text);
+  pool.query("SELECT * FROM ISSUES ORDER BY ID ASC", function ISSUES(err, resultIssue) {
+    if (err) throw err;
+      for (var j = 0; j < resultIssue.length; j++) {
+        res.write(`\n ${resultIssue[j].naam}   Issue: ${resultIssue[j].issue}   Date: ${resultIssue[j].arrivalDate}   ID: ${resultIssue[j].ID} \n`);
       }
-    });
+      res.end();
+  });
 });
 app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
 
+app.post('/delete', (req, res) => {
+  var Id = req.body.text;
+  function deleteIssue(id) {
+    var sql = 'DELETE FROM ISSUES WHERE ID  = ' + pool.escape(Id);
+    pool.query(sql, function (error, results, fields) {
+      if (error) throw error;
+    console.log('deleted ' + results.affectedRows + ' rows');
+    });
+  }
+  deleteIssue();
+});
+
+
 
 // function deleteIssue(message) {
-// 	console.log(message);
-// 	var Id = message;
-// 	var sql   = 'DELETE FROM coachIssue WHERE idIssue  = ' + connection.escape(Id);
-// 	pool.query(sql, function (error, results, fields) {
-// 	  if (error) throw error;
-// 	console.log('deleted ' + results.affectedRows + ' rows');
-// 	});
+// console.log(message);
+// var Id = message;
+// var sql   = 'DELETE FROM coachIssue WHERE idIssue  = ' + connection.escape(Id);
+// pool.query(sql, function (error, results, fields) {
+//   if (error) throw error;
+// console.log('deleted ' + results.affectedRows + ' rows');
+// });
 // }
 //
 //
@@ -95,3 +92,13 @@ app.listen(port, () => console.log(`Example app listening at http://localhost:${
 //     console.log("1 record inserted");
 //   });
 // }
+
+// pool.query("SELECT * FROM ISSUES ORDER BY ID ASC", function ISSUES(err, resultIssue) {
+//   if (err) throw err;
+//     for (var j = 0; j < resultIssue.length; j++) {
+//       res.write(`\n ${resultIssue[j].naam}   Issue: ${resultIssue[j].issue}   Date: ${resultIssue[j].arrivalDate}   ID: ${resultIssue[j].ID} \n`);
+//       if (j === resultIssue.length - 1) {
+//         res.end();
+//       }
+//     }
+// });
