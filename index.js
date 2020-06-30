@@ -36,10 +36,6 @@ bot.on('start', () => {
 
 //message Handler
 bot.on('message', (message) => {
-	if (message.type == 'message') {
-		// console.log(message.user);
-		// console.log(`type van message.user is ${typeof message.user}`);
-	}
 });
 
 
@@ -50,15 +46,17 @@ bot.on('error', err => console.log(err));
 // /commands
 app.post('/issues', (req, res) => {
   console.log(req.body.text);
+  console.log(req.body.user_id);
   pool.query("SELECT * FROM ISSUES ORDER BY ID ASC", function ISSUES(err, resultIssue) {
     if (err) throw err;
       for (var j = 0; j < resultIssue.length; j++) {
-        res.write(`\n ${resultIssue[j].naam}   Issue: ${resultIssue[j].issue}   Date: ${resultIssue[j].arrivalDate}   ID: ${resultIssue[j].ID} \n`);
+        var result = resultIssue[j].arrivalDate.toString();
+        var datum = result.slice(15, 25);
+        res.write(`\n ${resultIssue[j].naam}   Issue: ${resultIssue[j].issue}   Time: ${datum}   ID: ${resultIssue[j].ID} \n`);
       }
       res.end();
   });
 });
-app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
 
 app.post('/delete', (req, res) => {
   var Id = req.body.text;
@@ -66,7 +64,7 @@ app.post('/delete', (req, res) => {
     var sql = 'DELETE FROM ISSUES WHERE ID  = ' + pool.escape(Id);
     pool.query(sql, function (error, results, fields) {
       if (error) throw error;
-    console.log('deleted ' + results.affectedRows + ' rows');
+    res.send('deleted ' + results.affectedRows + ' rows');
     });
   }
   deleteIssue();
@@ -78,39 +76,9 @@ app.post('/add', (req, res) => {
   	var sql = `INSERT INTO issues (naam, issue) VALUES ('Laurens', '${Id}')`;
     pool.query(sql, function (err, result) {
       if (err) throw err;
-      console.log("1 record inserted");
+      res.send("1 record inserted");
     });
   }
   insert();
 });
-
-
-
-// function deleteIssue(message) {
-// console.log(message);
-// var Id = message;
-// var sql   = 'DELETE FROM coachIssue WHERE idIssue  = ' + connection.escape(Id);
-// pool.query(sql, function (error, results, fields) {
-//   if (error) throw error;
-// console.log('deleted ' + results.affectedRows + ' rows');
-// });
-// }
-//
-//
-// function insert(message) {
-// 	var sql = `INSERT INTO issues (naam, issue) VALUES (${message}, ${message})`;
-//   pool.query(sql, function (err, result) {
-//     if (err) throw err;
-//     console.log("1 record inserted");
-//   });
-// }
-
-// pool.query("SELECT * FROM ISSUES ORDER BY ID ASC", function ISSUES(err, resultIssue) {
-//   if (err) throw err;
-//     for (var j = 0; j < resultIssue.length; j++) {
-//       res.write(`\n ${resultIssue[j].naam}   Issue: ${resultIssue[j].issue}   Date: ${resultIssue[j].arrivalDate}   ID: ${resultIssue[j].ID} \n`);
-//       if (j === resultIssue.length - 1) {
-//         res.end();
-//       }
-//     }
-// });
+app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
