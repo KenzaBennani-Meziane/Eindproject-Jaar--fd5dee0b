@@ -62,7 +62,7 @@ app.listen(port, () => console.log(`Example app listening at http://localhost:${
 
 app.post('/delete', (req, res) => {
   var Id = req.body.text;
-  function deleteIssue(id) {
+  function deleteIssue() {
     var sql = 'DELETE FROM ISSUES WHERE ID  = ' + pool.escape(Id);
     pool.query(sql, function (error, results, fields) {
       if (error) throw error;
@@ -70,6 +70,18 @@ app.post('/delete', (req, res) => {
     });
   }
   deleteIssue();
+});
+
+app.post('/add', (req, res) => {
+  var Id = req.body.text;
+  function insert() {
+  	var sql = `INSERT INTO issues (naam, issue) VALUES ('Laurens', '${Id}')`;
+    pool.query(sql, function (err, result) {
+      if (err) throw err;
+      console.log("1 record inserted");
+    });
+  }
+  insert();
 });
 
 
