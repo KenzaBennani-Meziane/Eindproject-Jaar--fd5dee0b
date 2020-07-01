@@ -1,87 +1,149 @@
-// Required 
+const express = require('express')
+const app = express()
+const port = 3000
 require('dotenv').config();
 const token = process.env.SLACK_TOKEN;
 const mysql = require('mysql');
-const express = require('express')
-
-// Local Hosting
-const app = express()
-const port = 3000
-app.post('/', (req, res) => {
-    console.warn (req);
-    res.send('Hello World!');
-})
-app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
+var bodyParser = require('body-parser');
+app.use(bodyParser());
 
 
-// Database Connection
-var connection = mysql.createConnection({
-	host: "skil1.mysql.database.azure.com",
-	database: 'skil',
-	user: process.env.DB_USER,
-	password: process.env.DB_PASS
+var pool  = mysql.createPool({
+  connectionLimit : 10,
+  host            : "skil1.mysql.database.azure.com",
+  user            :  process.env.DB_USER,
+  password        : process.env.DB_PASS,
+  database        : 'skil'
 });
-
-connection.connect(function (err) {
-	if (err) throw err;
+pool.getConnection(function(err, connection) {
+	if (err) throw err; // not connected!
 	console.log("Connected!");
 });
 
 var SlackBot = require('slackbots');
-const coaches = ["UQCGKUNAK", "UF47HSVPT", "UQEB1731P", "UQCSZPV1U", "UQAM223S9"];
+const coaches = ["UQCGKUNAK", "UF47HSVPT", "UQEB1731P", "UQCSZPV1U", "UQAM223S9", "UFYU97CSU", "UTCT9JF4H"];
+const masters = ["UQCGKUNAK"];
 
-
-// Create a bot
+// Slackbot
 var bot = new SlackBot({
-	token: process.env.SLACK_TOKEN, // Add a bot https://my.slack.com/services/new/bot and put the token
+	token: process.env.SLACK_TOKEN, 
 	name: 'skilbot'
 });
+
 bot.on('start', () => {
-	const params = {
-		icon_emoji: ':robot:'
-	};
-
-	bot.postMessageToChannel(
-		'skilbot_test_channel',
-		'SKILbot tot je beschikking',
-		params
-	);
+  console.log("Hi masters, raad is wie er is opgestart. uwu")
 });
 
+// Message Handler
 bot.on('message', (message) => {
-	if (message.type == 'message') {
-		console.log(message.user);
-		console.log(`type van message.user is ${typeof message.user}`);
-
-      if (coaches.includes(message.user)) {
-        console.log('test coaches includes');
-        issuesTies();
-      }
-	}
 });
-
 
 // Error Handler
 bot.on('error', err => console.log(err));
 
 
-// Functions (Ignore the amount of nesting pls)
-function issuesTies() {
-	console.log('begin functie issuesTies()');
-	connection.query("SELECT idIssue FROM coachIssue WHERE idCoach=1", function STUDENTS(err, resultTies) {
-		for (var i = 0; i < resultTies.length; i++) {
-			console.log(`index: ${resultTies[i].idIssue} in de for loop`);
-			var ID = resultTies[i].idIssue;
 
-			connection.query("SELECT * FROM ISSUES WHERE ID=" + ID, function STUDENTS(err, resultIssue) {
-				if (err) throw err;
+// ---------------- Slash Commands ---------------- //
 
-				for (var j = 0; j < resultIssue.length; j++) {
-					bot.postMessageToChannel(
-						'skilbot_test_channel',
-						resultIssue[j]);
-				}
-			});
-		}
-	});
-}
+// Command: /issues - Laat alle issues in de queue zien.
+app.post('/issues', (req, res) => {
+  console.log(req.body.text);
+  console.log(req.body.user_name + " executed /issues");
+  pool.query("SELECT * FROM ISSUES ORDER BY ID ASC", function ISSUES(err, resultIssue) {
+    if (err) throw err;
+      for (var j = 0; j < resultIssue.length; j++) {
+        var result = resultIssue[j].arrivalDate.toString();
+        var datum = result.slice(15, 25);
+        res.write(`\n ${resultIssue[j].naam}   Issue: ${resultIssue[j].issue}   Time: ${datum}   ID: ${resultIssue[j].ID} \n`);
+      }
+      res.end();
+  });
+});
+
+
+// Command: /add-issue - Toevoegen van een issue in de queue.
+app.post('/add-issue', (req, res) => {
+  var Text = req.body.text;
+  var userName = req.body.user_name;
+  console.log(req.body.user_name + " executed /add-issue");
+  function insert() {
+  	var sql = `INSERT INTO issues (naam, issue) VALUES ('${userName}', '${Text}')`;
+    pool.query(sql, function (err, result) {
+      if (err) throw err;
+      res.send("1 record inserted");
+    });
+  }
+  bot.postMessageToChannel(
+    "_skillbot_test_public",
+    `NEW ISSUE ADDED BY: ${userName}`
+  );
+  insert();
+});
+
+
+// Command: /delete-issue - Verwijder een issue met het ID nummer.
+app.post('/delete-issue', (req, res) => {
+  var Text = req.body.text;
+  var userName = req.body.user_name;
+  console.log(req.body.user_name + " executed /delete-issue");
+	if(coaches.includes(req.body.user_id)){
+    function deleteIssue() {
+      var sql = 'DELETE FROM ISSUES WHERE ID  = ' + pool.escape(Text);
+      pool.query(sql, function (error, results, fields) {
+        if (error) throw error;
+        res.send('deleted ' + results.affectedRows + ' rows');
+  	  });
+    }
+ }
+ bot.postMessageToChannel(
+   "_skillbot_test_public",
+   `ISSUE SOLVED BY: ${userName}`
+ );
+ deleteIssue();
+});
+
+
+// Command: /skil-info - Informatie over de bot en een lijst met commands.
+app.post('/skil-info', (req, res) => {
+  console.log(req.body.user_name + " executed /skil-info");
+    res.header('Content-Type', 'application/json');
+    res.write(JSON.stringify({
+        "blocks": [
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": ":slack: Hi, ik ben SKILbot!\nIk ben op deze workspace tot leven gekomen door drie studenten van de Bit Academy. Maar dit gaat natuurlijk niet over mij, maar over wat ik kan!  \n\n\n :clipboard: *Mijn Commands:* \n\n*/skil-info* — _De command die je zojuist hebt gebruikt om dit te zien._ \n*/issues* — _Alle issues vertonen._ \n*/add* — _Een issue toevoegen in de queue._ \n*/delete* — _Een issue verwijderen van de queue._ "
+            }
+          },
+          {
+            "type": "divider"
+          },
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": ":question: Vragen? Ik ben helaas _niet_ geprogammeerd die te beantwoorden, maar neem gerust contact op met *Iz-Dine*, *Kenza* of *Laurens*!"
+            },
+            "accessory": {
+              "type": "image",
+              "image_url": "https://avatars3.githubusercontent.com/u/53334549?s=280&v=4",
+              "alt_text": "Let's code!"
+            }
+          },
+          {
+            "type": "context",
+            "elements": [
+              {
+                "type": "plain_text",
+                "text": " SKILbot© created by Iz-Dine, Kenza and Laurens.",
+                "emoji": true
+              }
+            ]
+          }
+        ]
+      }
+    ));
+    res.end();
+});
+app.listen(port, () => console.log(`Example app listening at http://localhost:${port}`))
