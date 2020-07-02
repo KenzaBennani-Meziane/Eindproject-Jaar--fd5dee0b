@@ -7,7 +7,6 @@ const mysql = require('mysql');
 var bodyParser = require('body-parser');
 app.use(bodyParser());
 
-
 var pool  = mysql.createPool({
   connectionLimit : 10,
   host            : "skil1.mysql.database.azure.com",
@@ -24,9 +23,9 @@ var SlackBot = require('slackbots');
 const coaches = ["UQCGKUNAK", "UF47HSVPT", "UQEB1731P", "UQCSZPV1U", "UQAM223S9", "UFYU97CSU", "UTCT9JF4H"];
 const masters = ["UQCGKUNAK"];
 
-// Create a bot
+// Slackbot
 var bot = new SlackBot({
-	token: process.env.SLACK_TOKEN, // Add a bot https://my.slack.com/services/new/bot and put the token
+	token: process.env.SLACK_TOKEN,
 	name: 'skilbot'
 });
 
@@ -38,12 +37,10 @@ bot.on('start', () => {
 bot.on('message', (message) => {
 });
 
-
-
 // Error Handler
 bot.on('error', err => console.log(err));
 
-// Slash Commands
+// ---------------- Slash Commands ---------------- //
 app.post('/issues', (req, res) => {
   console.log(req.body.text);
   console.log(req.body.user_name + " executed /issues");
@@ -58,26 +55,7 @@ app.post('/issues', (req, res) => {
   });
 });
 
-app.post('/delete-issue', (req, res) => {
-  var Text = req.body.text;
-  var userName = req.body.user_name;
-  console.log(req.body.user_name + " executed /delete-issue");
-	if(coaches.includes(req.body.user_id)){
-    function deleteIssue() {
-      var sql = 'DELETE FROM ISSUES WHERE ID  = ' + pool.escape(Text);
-      pool.query(sql, function (error, results, fields) {
-        if (error) throw error;
-        res.send('deleted ' + results.affectedRows + ' rows');
-  	  });
-    }
- }
- bot.postMessageToChannel(
-   "_skillbot_test_public",
-   `ISSUE SOLVED BY: ${userName}`
- );
- deleteIssue();
-});
-
+// Command: /add-issue - Toevoegen van een issue in de queue.
 app.post('/add-issue', (req, res) => {
   var Text = req.body.text;
   var userName = req.body.user_name;
@@ -90,41 +68,87 @@ app.post('/add-issue', (req, res) => {
     });
   }
   bot.postMessageToChannel(
-    "_skillbot_test_public",
+    "skilbot_test_channel",
     `NEW ISSUE ADDED BY: ${userName}`
   );
   insert();
 });
 
+// Command: /delete-issue - Verwijder een issue met het ID nummer.
+app.post('/delete-issue', (req, res) => {
+  var Text = req.body.text;
+  var userName = req.body.user_name;
+  console.log(req.body.user_name + " executed /delete-issue");
+	if(coaches.includes(req.body.user_id)){
+    function deleteIssue() {
+      var sql = 'DELETE FROM ISSUES WHERE ID  = ' + pool.escape(Text);
+      pool.query(sql, function (error, results, fields) {
+        if (error) throw error;
+        res.send('deleted ' + results.affectedRows + ' rows');
+  	  });
+    }
+    deleteIssue();
+ } else {
+   function deleteIssueStudent() {
+     var sql = `DELETE FROM ISSUES WHERE naam  = ${pool.escape(userName)}`;
+     pool.query(sql, function (error, results, fields) {
+       if (error) throw error;
+       res.send('deleted ' + results.affectedRows + ' rows');
+    });
+   }
+   deleteIssueStudent();
+ }
+ bot.postMessageToChannel(
+   "skilbot_test_channel",
+   `ISSUE SOLVED BY: ${userName}`
+ );
+});
+
+// Command: /skil-info - Informatie over de bot en een lijst met commands.
 app.post('/skil-info', (req, res) => {
   console.log(req.body.user_name + " executed /skil-info");
     res.header('Content-Type', 'application/json');
     res.write(JSON.stringify({
-    "blocks": [
-        {
-            "type": "section",
-            "text": {
-                "type": "mrkdwn",
-                "text": ":slack: Hi, ik ben SKILbot!\nIk ben op dit platform gezet door drie studenten van de Bit Academy, maar dit gaat niet over mij, maar over wat ik kan.  \n \n Hier vind je een lijst van alle commands: \n*/skil-info* — _De command die je zojuist hebt gebruikt om dit te zien._ \n*/issues* — _Alle issues vertonen._ \n*/add* — _Een issue toevoegen in de queue._ \n*/delete* — _Een issue verwijderen van de queue._ \n\n\n\n\n\n\nVragen? Ik ben helaas _niet_ geprogammeerd die te beantwoorden, maar neem gerust contact op met *Iz-Dine*, *Kenza* of *Laurens*!"
-            },
-            "accessory": {
-                "type": "image",
-                "image_url": "https://avatars3.githubusercontent.com/u/53334549?s=280&v=4",
-                "alt_text": "Let's code!"
-            }
-        },
-        {
-            "type": "context",
-            "elements": [
-                {
-                    "type": "plain_text",
-                    "text": " SKILbot© created by Iz-Dine, Kenza and Laurens.",
-                    "emoji": true
-                }
-            ]
-        }
-    ]
-}
+      "blocks": [
+           {
+             "type": "section",
+             "text": {
+               "type": "mrkdwn",
+               "text": ":slack: Hi, ik ben SKILbot!\nIk ben op deze workspace tot leven gekomen door drie studenten van de Bit Academy. Maar dit gaat natuurlijk niet over mij, maar over wat ik kan!  \n\n\n :clipboard: *Mijn Commands:* \n\n*/skil-info* — _De command die je zojuist hebt gebruikt om dit te zien._ \n*/issues* — _Alle issues vertonen._ \n*/add-issue* — _Een issue toevoegen in de queue._ \n*/delete-issue* — _Een issue verwijderen van de queue._ "
+             }
+           },
+           {
+             "type": "divider"
+           },
+           {
+             "type": "section",
+             "text": {
+               "type": "mrkdwn",
+               "text": ":question: Vragen? Ik ben helaas _niet_ geprogammeerd die te beantwoorden, maar neem gerust contact op met <@UQAM223S9>, <@UQCSZPV1U> of \n <@UQCGKUNAK>"
+             },
+               "type": "section",
+               "text": {
+                 "type": "mrkdwn",
+                 "text": "Voor de BETA testers: \n Bedankt voor het meedoen aan de BETA van de SKILbot, jullie kunnen feedback geven in #_skillbot_test_public of in onze dm's."
+               },
+             "accessory": {
+               "type": "image",
+               "image_url": "https://avatars3.githubusercontent.com/u/53334549?s=280&v=4",
+               "alt_text": "Let's code!"
+             }
+           },
+           {
+             "type": "context",
+             "elements": [
+               {
+                 "type": "plain_text",
+                 "text": " SKILbot© created by Iz-Dine, Kenza and Laurens.",
+                 "emoji": true
+               }
+             ]
+           }
+         ]
+       }
     ));
     res.end();
 });
