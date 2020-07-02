@@ -1,6 +1,6 @@
-DROP DATABASE scrum;
-CREATE DATABASE scrum;
-USE scrum;
+DROP DATABASE skil;
+CREATE DATABASE skil;
+USE skil;
 
 CREATE TABLE COACHES(
 naamCoach varchar(30)  NOT NULL,
@@ -8,7 +8,6 @@ ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL
 );
 INSERT INTO COACHES (naamCoach, ID)
 VALUES ('Ties', NULL), ('Klaas', NULL);
-
 
 CREATE TABLE STUDENTS(
 naamStudent varchar(30) NOT NULL,
@@ -53,10 +52,8 @@ VALUES
 
 CREATE TABLE ISSUES(
     naam VARCHAR(30) NOT NULL,
-    issue VARCHAR(500) NOT NULL,
+    issue TEXT NOT NULL,
     arrivalDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    idStudent INT,
-    FOREIGN KEY (idStudent) REFERENCES STUDENTS(ID),
     ID INT AUTO_INCREMENT PRIMARY KEY NOT NULL
 );
 insert into ISSUES (naam, issue)
@@ -96,6 +93,3 @@ value(1,5);
 insert into coachIssue (idCoach, idIssue)
 value(1,6);
 
-SELECT naamStudent FROM STUDENTS;
-SHOW TABLES;
-DESCRIBE issues;
