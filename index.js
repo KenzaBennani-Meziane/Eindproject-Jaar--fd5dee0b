@@ -9,9 +9,9 @@ app.use(bodyParser());
 
 var pool  = mysql.createPool({
   connectionLimit : 10,
-  host            : "skil1.mysql.database.azure.com",
-  user            :  process.env.DB_USER,
-  password        : process.env.DB_PASS,
+  host            : "localhost",
+  user            :  "root",
+  password        : "",
   database        : 'skil'
 });
 pool.getConnection(function(err, connection) {
@@ -44,15 +44,32 @@ bot.on('error', err => console.log(err));
 app.post('/issues', (req, res) => {
   console.log(req.body.text);
   console.log(req.body.user_name + " executed /issues");
+  let issues = {
+    "attachments": [{
+          "color": "#2e6eb8",
+          "blocks": []
+        }]};
   pool.query("SELECT * FROM ISSUES ORDER BY ID ASC", function ISSUES(err, resultIssue) {
     if (err) throw err;
       for (var j = 0; j < resultIssue.length; j++) {
         var result = resultIssue[j].arrivalDate.toString();
         var datum = result.slice(15, 25);
-        res.write(`\n *${resultIssue[j].naam}*   *Issue:* _${resultIssue[j].issue}_   *Time:* _${datum}_   *ID:* _${resultIssue[j].ID}_ \n`);
+        issues["attachments"][0]["blocks"].push({
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": ` *${resultIssue[j].naam}* \n *Issue:* _${resultIssue[j].issue}_   *Time:* _${datum}_   *ID*: _${resultIssue[j].ID}_ \n`,
+                    }},{
+                    "type": "divider"
+                });
       }
-      res.write(`*Aantal issues:* ${resultIssue.length}`);
-      res.end();
+      issues["attachments"][0]["blocks"].push({
+                  "type": "section",
+                  "text": {
+                      "type": "mrkdwn",
+                      "text": `*Aantal issues:* ${resultIssue.length}`,
+                  }});
+      res.json(issues);
   });
 });
 
