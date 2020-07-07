@@ -49,8 +49,9 @@ app.post('/issues', (req, res) => {
       for (var j = 0; j < resultIssue.length; j++) {
         var result = resultIssue[j].arrivalDate.toString();
         var datum = result.slice(15, 25);
-        res.write(`\n ${resultIssue[j].naam}   Issue: ${resultIssue[j].issue}   Time: ${datum}   ID: ${resultIssue[j].ID} \n`);
+        res.write(`\n *${resultIssue[j].naam}*   *Issue:* _${resultIssue[j].issue}_   *Time:* _${datum}_   *ID:* _${resultIssue[j].ID}_ \n`);
       }
+      res.write(`*Aantal issues:* ${resultIssue.length}`);
       res.end();
   });
 });
@@ -61,7 +62,7 @@ app.post('/add-issue', (req, res) => {
   var userName = req.body.user_name;
   console.log(req.body.user_name + " executed /add-issue");
   function insert() {
-  	var sql = `INSERT INTO issues (naam, issue) VALUES ('${userName}', '${Text}')`;
+  	var sql = `INSERT INTO issues (naam, issue) VALUES ( ${pool.escape(userName)} , ${pool.escape(Text)})`;
     pool.query(sql, function (err, result) {
       if (err) throw err;
       res.send("1 record inserted");
